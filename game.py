@@ -47,7 +47,7 @@ class Message_Window(pygame.sprite.Sprite):
     def draw(self):
         pygame.draw.rect(screen,(0,0,0),self.rect,4)
 
-    def weapon_draw(self,weapon):
+    def weapon_draw(self,weapon):#わざの表示
         x=70
         y=SCREEN_H-110
         for i in range(len(weapon)):
@@ -82,7 +82,7 @@ class Message_Window(pygame.sprite.Sprite):
             pygame.draw.polygon(screen,(0,0,0),[[405,SCREEN_H-45],[395,SCREEN_H-55],[395,SCREEN_H-35]])
             self.compatibility()
 
-    def weapon_detail(self,weapon,choice):
+    def weapon_detail(self,weapon,choice):#わざの詳細表示
         pygame.draw.rect(screen,(255,255,255),(400,250,200,170),0)
         pygame.draw.rect(screen,(0,0,0),(400,250,200,170),4)
         w_type=japanes.render("タイプ :",True,(0,0,0))
@@ -109,44 +109,44 @@ class Message_Window(pygame.sprite.Sprite):
         screen.blit(w_iryoku,(410,340))
         screen.blit(w_iryoku2,(x,380))
 
-    def compatibility(self):
+    def compatibility(self):#相性の表示
         compati=pygame.image.load("system/compatibility.png")
         compati=pygame.transform.scale(compati,(400,400))
         screen.blit(compati,(120,10))
 
-    def attack(self,attacker):
+    def attack(self,attacker):#攻撃時のメッセージ
         txt=japanes.render("{}のこうげき！".format(attacker.name),True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
 
-    def lose(self,loser):
+    def lose(self,loser):#倒した・倒されたとき
         txt=japanes.render("{}はたおれた！".format(loser.name),True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
 
-    def clear(self):
+    def clear(self):#クリアした時
         txt=japanes.render("クリア！",True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
 
-    def gameover(self):
+    def gameover(self):#ゲームオーバー時
         txt=japanes.render("ゲームオーバー…",True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
 
-    def batsugun(self):
+    def batsugun(self):#効果抜群のわざを使った時
         txt=japanes.render("こうかは　ばつぐんだ！",True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-70))
     
-    def cure(self,name):
+    def cure(self,name):#回復した時
         txt=japanes.render("{}は回復した！".format(name),True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
 
-    def w_add(self):
+    def w_add(self):#わざ追加時
         txt=japanes.render("わざを追加した！",True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
 
-    def w_change(self,num):
+    def w_change(self,num):#わざ変更時
         txt=japanes.render("わざ{}を変更した！".format(num+1),True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
 
-    def buff(self,target,weapon):
+    def buff(self,target,weapon):#バフしたとき
         txt=japanes.render("{}は強化技を繰り出した！".format(target.name),True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
         if weapon[2]==2:
@@ -156,7 +156,7 @@ class Message_Window(pygame.sprite.Sprite):
         txt=japanes.render("{}の{}が".format(target.name,weapon[1])+s+"あがった！",True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-70))
 
-    def debuff(self,me,target,weapon):
+    def debuff(self,me,target,weapon):#デバフしたとき
         txt=japanes.render("{}は弱体化技を繰り出した！".format(me.name),True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-110))
         if weapon[2]==2:
@@ -166,7 +166,7 @@ class Message_Window(pygame.sprite.Sprite):
         txt=japanes.render("{}の{}が".format(target.name,weapon[1])+s+"さがった！",True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-70))
 
-    def show_status(self,target):
+    def show_status(self,target):#ステータス表示
         hp=int(target.health)
         nowHP=int(target.HP.get_nowhp())
         attack=int(target.attack)
@@ -181,11 +181,9 @@ class Message_Window(pygame.sprite.Sprite):
         screen.blit(defence_txt,(70,SCREEN_H-60))
         screen.blit(speed_txt,(340,SCREEN_H-60))
 
-    def toutatu(self,level):
-        txt=japanes.render("{}層まで到達".format(level+1),True,(0,0,0))
+    def toutatu(self,level):#ゲームオーバー時にn層まで到達したことを示す
+        txt=japanes.render("{}層まで到達".format(level),True,(0,0,0))
         screen.blit(txt,(60,SCREEN_H-70))
-        
-        
             
 # HPバー
 class HP_bar(pygame.sprite.Sprite):
@@ -206,10 +204,10 @@ class HP_bar(pygame.sprite.Sprite):
         pygame.draw.rect(screen,color,(self.x,self.y,200*self.nowHP/health,40),0)
         pygame.draw.rect(screen,(0,0,0),self.rect,2)
 
-    def hp_update(self,damage):
+    def hp_update(self,damage):#HPの更新
         self.nowHP-=damage
 
-    def get_nowhp(self):
+    def get_nowhp(self):#現在HPの確認
         return self.nowHP
 
 # 自分と敵の共通部
@@ -233,33 +231,35 @@ class Character(pygame.sprite.Sprite):
     def set_status(self):
         pass
 
-    def receive_damage(self,weapon,opponent):
-        msg=Message_Window()
+    def receive_damage(self,weapon,opponent):#受けるダメージ計算
+        damage=0
+        batsugun_flag=False
+        buff_flag=False
+        debuff_flag=False
         if weapon[0]<6:
-            msg.attack(opponent)
             damage=int(weapon[1]*((opponent.attack*(1+opponent.buff[0]/2)*(2/(opponent.debuff[0]+2)))/(self.defence*(1+self.buff[1]/2)*(2/(2+self.debuff[1]))))*1/25)
             if not (self.color[0]==what_is_color[weapon[0]][0] or self.color[1]==what_is_color[weapon[0]][1] or self.color[2]==what_is_color[weapon[0]][2]):
                 damage=2*damage
-                msg.batsugun()
-            self.HP.hp_update(damage)
+                batsugun_flag=True
         elif weapon[0]==7:
             opponent.set_buff(weapon)
-            msg.buff(opponent,weapon)
+            buff_flag=True
         elif weapon[0]==6:
             self.set_debuff(weapon)
-            msg.debuff(opponent,self,weapon)
+            debuff_flag=True
+        return damage,batsugun_flag,buff_flag,debuff_flag
 
-    def check_death(self):
+    def check_death(self):#倒れたか
         nowHP=self.HP.get_nowhp()
         if nowHP<=0:
             return True
         else:
             return False
 
-    def set_buff(self,weapon):
+    def set_buff(self,weapon):#バフ追加
         buff=weapon[1]
         if buff=="こうげき":
-            if self.debuff[0]>0:
+            if self.debuff[0]>0:#デバフがあったら打ち消し
                 self.debuff[0]-=weapon[2]
                 i=0
                 if self.debuff[0]<0:
@@ -289,10 +289,10 @@ class Character(pygame.sprite.Sprite):
             else:
                 self.buff[0]+=weapon[2]
 
-    def set_debuff(self,weapon):
+    def set_debuff(self,weapon):#デバフ追加
         debuff=weapon[1]
         if debuff=="こうげき":
-            if self.buff[0]>0:
+            if self.buff[0]>0:#バフがあったら打ち消し
                 self.buff[0]-=weapon[2]
                 i=0
                 if self.buff[0]<0:
@@ -322,7 +322,6 @@ class Character(pygame.sprite.Sprite):
             else:
                 self.debuff[2]+=weapon[2]
 
-
 # 自分
 class My_Chara(Character):
     def __init__(self,color,image):
@@ -334,13 +333,25 @@ class My_Chara(Character):
         self.HP=HP_bar(400,200,self.health)
         super().__init__(150,250,70,color,self.HP)
 
-    def set_weapon(self):
+    def set_weapon(self):#初期わざ決定
         sorted_color=sorted(self.use_image_color,reverse=True)
         for i,sc in enumerate(sorted_color):
-            if sc <0.05:
+            if sc <0.05:#面積が小さすぎる場合は無視
                 break
-            col=self.use_image_color.index(sc)
-            if col>=6:
+            for col,ar in enumerate(self.use_image_color):#面積が同じ場合にわざが重複しないように
+                flag=False
+                if sc==ar:
+                    if i==0:
+                        break
+                    else:
+                        for w in self.weapon:
+                            if col==w[0]:
+                                flag=True
+                        if flag:
+                            continue
+                        else:
+                            break
+            if col>=6:#バフデバフ（白黒）の場合
                 if what_is_color[self.weapon[0][0]][0]==255:
                     r=1
                 else:
@@ -372,13 +383,13 @@ class My_Chara(Character):
             if i>=3:
                 break
     
-    def set_status(self):
+    def set_status(self):#初期ステータス
         self.health=100+10*self.use_image_color[1]//0.05+5*self.use_image_color[0]//0.1+5*self.use_image_color[2]//0.1
         self.attack=10+3*self.use_image_color[5]//0.05+self.use_image_color[0]//0.1+self.use_image_color[4]//0.1
         self.speed=10+3*self.use_image_color[3]//0.05+self.use_image_color[4]//0.1+self.use_image_color[2]//0.1
         self.defence=10+self.use_image_color[1]//0.1+self.use_image_color[3]//0.1+self.use_image_color[5]//0.1+self.use_image_color[0]//0.2+self.use_image_color[2]//0.2+self.use_image_color[4]//0.2
 
-    def status_up(self,up):
+    def status_up(self,up):#ステータス増加
         if up[0]=="HP":
             self.health+=up[1]
             self.HP.hp_update(-up[1])
@@ -389,14 +400,10 @@ class My_Chara(Character):
         else:
             self.speed+=up[1]
 
-    def cure(self,num):
+    def cure(self,num):#回復
         nowHP=self.HP.get_nowhp()
         hp=min(nowHP+num,self.health)
         self.HP.hp_update(nowHP-hp)
-        msg=Message_Window()
-        msg.draw()
-        msg.cure(self.name)
-
 
 # 敵
 class Enemy(Character):
@@ -410,7 +417,7 @@ class Enemy(Character):
         self.set_weapon(num)
         self.num=num
 
-    def set_weapon(self,num):
+    def set_weapon(self,num):#初期わざ
         sorted_color=sorted(self.use_image_color,reverse=True)
         for i,sc in enumerate(sorted_color):
             if sc <0.05:
@@ -448,16 +455,17 @@ class Enemy(Character):
             if i>=3 or i>=num//4:
                 break
 
-    def set_status(self,num):
+    def set_status(self,num):#初期ステータス
         self.health=10*num+50+5*self.use_image_color[1]//0.05+self.use_image_color[0]//0.1+self.use_image_color[2]//0.1
         self.attack=2*num+5+3*self.use_image_color[5]//0.05+self.use_image_color[0]//0.1+self.use_image_color[4]//0.1
         self.speed=2*num+5+3*self.use_image_color[3]//0.05+self.use_image_color[4]//0.1+self.use_image_color[2]//0.1
         self.defence=num+5+self.use_image_color[1]//0.1+self.use_image_color[3]//0.1+self.use_image_color[5]//0.1+self.use_image_color[0]//0.2+self.use_image_color[2]//0.2+self.use_image_color[4]//0.2
 
     def name_draw(self):
-        txt=japanes.render("{} (level {})".format(self.name,self.num+1),True,(0,0,0))
+        txt=japanes.render("{} (level {})".format(self.name,self.num),True,(0,0,0))
         screen.blit(txt,(60,25))
 
+#ボス
 class BOSS(Character):
     def __init__(self,num):
         color,self.use_image_color,name=self.color_read()
@@ -468,7 +476,7 @@ class BOSS(Character):
         super().__init__(490,110,40,color,self.HP)
         self.set_weapon()
 
-    def color_read(self):
+    def color_read(self):#画像フォルダからランダムで使用する画像を選択して生成
         files=glob.glob("./image/*")
         file=np.random.choice(files)
         img=cv.imread(file)
@@ -551,42 +559,38 @@ class BOSS(Character):
         txt=japanes.render("{}".format(self.name),True,(0,0,0))
         screen.blit(txt,(60,25))
 
-
-# 画像取得・選択
-def get_image_file():
-    files=glob.glob("./image/*")
-    imageflag=True
-    while imageflag:
-        clock.tick(60)
-        screen.fill((255,255,255))
-        txt=japanes.render("画像を選択",True,(0,0,0))
-        screen.blit(txt,(SCREEN_W/3+20,20))
-        h=70
-        for file in files:
-            file=file.split("/")
-            txt=japanes.render(file[-1],True,(0,0,0))
-            screen.blit(txt,(SCREEN_W/4+30,h))
-            h+=35
-        mouse_pos=pygame.mouse.get_pos()
-        choice=mouse_pos[1]//35-2
-        if choice>=0 and choice<len(files):
-            pygame.draw.rect(screen,(255,0,0),(SCREEN_W/4+28,70+35*choice,250,32),2)
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                if choice>=0 and choice<len(files):
-                    imstr=files[choice]
-                    img=cv.imread("{}".format(imstr))
-                    imageflag=False
-            if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-    return img
-
+# 画像取得・選択画面
+def get_image_file(files):
+    next_status=2
+    finflag=False
+    img=None
+    screen.fill((255,255,255))
+    txt=japanes.render("画像を選択",True,(0,0,0))
+    screen.blit(txt,(SCREEN_W/3+20,20))
+    h=70
+    for file in files:
+        file=file.split("/")
+        txt=japanes.render(file[-1],True,(0,0,0))
+        screen.blit(txt,(SCREEN_W/4+30,h))
+        h+=35
+    mouse_pos=pygame.mouse.get_pos()
+    choice=mouse_pos[1]//35-2
+    if choice>=0 and choice<len(files):
+        pygame.draw.rect(screen,(255,0,0),(SCREEN_W/4+28,70+35*choice,250,32),2)
+    pygame.display.update()
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            if choice>=0 and choice<len(files):
+                imstr=files[choice]
+                img=cv.imread("{}".format(imstr))
+                finflag=True
+                next_status=3
+        if event.type == pygame.QUIT:
+                next_status=-1
+    return next_status,finflag,img
 
 # 画像読み込み
-def color_read():
-    img=get_image_file()
+def color_read(img):
     h,w,_=img.shape
     size=h*w
     Area_rs=[]
@@ -600,13 +604,13 @@ def color_read():
             mask=cv.inRange(hsv_img,low,high)
         color_area=cv.countNonZero(mask)
         area_r=color_area/size
-        if i>6:
+        if i>=6:#白黒がメインカラーにならないように，白黒の面積を他の色(ランダム)の面積に加算
             rnd=np.random.randint(0,6)
             Area_rs[rnd]+=area_r
             Area_rs.append(area_r)
         else:
             Area_rs.append(area_r)
-    if Area_rs.count(max(Area_rs))>1:
+    if Area_rs.count(max(Area_rs))>1:#最大面積の色が複数ある場合，白黒でなければランダムでメインカラーに
         ind=[]
         for i,ar in enumerate(Area_rs):
             if i>=6:
@@ -618,233 +622,150 @@ def color_read():
         max_color_num=Area_rs.index(max(Area_rs))
     return My_Chara(what_is_color[max_color_num],Area_rs)
 
-# バトル処理
-def battle_phase(me,enemy,message_w):
-    attack_choice_flag=True
-    death_flag=False
-    if type(enemy)==BOSS:
-        screen.fill((255,255,255))
-        me.draw()
-        enemy.draw()
-        enemy.name_draw()
-        message_w.draw()
-        pygame.draw.rect(screen,(255,255,0),(0,SCREEN_H/4,SCREEN_W,120),0)
-        txt=bigjapanese.render("B O S S",True,(255,0,0))
-        screen.blit(txt,(SCREEN_W/2-150,SCREEN_H/4+35))
-        pygame.display.update()
-        pygame.time.delay(1500)
-
-    while not death_flag:
-        while attack_choice_flag:
-            clock.tick(60)
-            screen.fill((255,255,255))
-            me.draw()
-            enemy.draw()
-            enemy.name_draw()
-            message_w.draw()
-            message_w.weapon_draw(me.weapon)
-            pygame.display.update()
-
-            for event in pygame.event.get():
-                if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                    mouse_pos=pygame.mouse.get_pos()
-                    mx=mouse_pos[0]
-                    my=mouse_pos[1]
-                    if mx>60 and mx<200:
-                        if my>SCREEN_H-120 and my<SCREEN_H-70:
-                            attack=0
-                            attack_choice_flag=False
-                        elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=3:
-                            attack=2
-                            attack_choice_flag=False
-                    elif mx>230 and mx<370:
-                        if my>SCREEN_H-120 and my<SCREEN_H-70 and len(me.weapon)>=2:
-                            attack=1
-                            attack_choice_flag=False
-                        elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=4:
-                            attack=3
-                            attack_choice_flag=False
-                        
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-        
-        while not attack_choice_flag:
-            clock.tick(60)
-            rnd=0
-            my_speed=me.speed*(1+me.buff[2]/2)*(2/(2+me.debuff[2]))
-            en_speed=enemy.speed*(1+enemy.buff[2]/2)*(2/(2+enemy.debuff[2]))
-            if my_speed==en_speed:
-                rnd=np.random.randint(0,2)
-                if rnd==0:
-                    rnd=-1
-            if my_speed + rnd > en_speed:
-                screen.fill((255,255,255))
-                enemy.receive_damage(me.weapon[attack],me)
-                if enemy.check_death():
-                    death_flag=True
-                me.draw()
-                enemy.draw()
-                enemy.name_draw()
-                message_w.draw()
-                
-                pygame.display.update()
-                click()
-                if not death_flag:
-                    screen.fill((255,255,255))
-                    me.receive_damage(enemy.weapon[np.random.randint(0,len(enemy.weapon))],enemy)
-                    me.draw()
-                    enemy.draw()
-                    enemy.name_draw()
-                    message_w.draw()
-                    pygame.display.update()
-                    click()
-            else:
-                screen.fill((255,255,255))
-                me.receive_damage(enemy.weapon[np.random.randint(0,len(enemy.weapon))],enemy)
-                if me.check_death():
-                    death_flag=True
-                me.draw()
-                enemy.draw()
-                enemy.name_draw()
-                message_w.draw()
-                pygame.display.update()
-                click()
-                if not death_flag:
-                    screen.fill((255,255,255))
-                    enemy.receive_damage(me.weapon[attack],me)
-                    me.draw()
-                    enemy.draw()
-                    enemy.name_draw()
-                    message_w.draw()
-                    
-                    pygame.display.update()
-                    click()
-            if me.check_death() or enemy.check_death():
-                death_flag=True
-            attack_choice_flag=True
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
+# バトル内わざ選択画面
+def battle_phase_choice(me,enemy,message_w):
+    next_status=4
+    attack=-1
     screen.fill((255,255,255))
     me.draw()
     enemy.draw()
     enemy.name_draw()
     message_w.draw()
-    if me.check_death():
-        message_w.lose(me)
-    else:
-        message_w.lose(enemy)
+    message_w.weapon_draw(me.weapon)
     pygame.display.update()
-    click()
 
-# レベルアップ処理
-def level_up(me):
-    status=["HP","こうげき","ぼうぎょ","すばやさ"]
-    hp_update_num=[10,30,50]
-    update_num=[1,3,5]
-    status_up=[]
-    count=0
-    while count<3:
-        s=np.random.choice(status)
-        i=np.random.choice([0,1,2],p=[0.2,0.7,0.1])
-        if s=="HP":
-            x=[s,hp_update_num[i]]
-        else:
-            x=[s,update_num[i]]
-        if not x in status_up:
-            status_up.append(x)
-            count+=1
-    
-    msg=Message_Window()
-    levelupflag=True
-    while levelupflag:
-        screen.fill((255,255,255))
-        msg.draw()
-        msg.show_status(me)
-        for i in range(3):
-            pygame.draw.rect(screen,(0,0,0),(80+180*i,120,150,150),4)
-            txt=japanes.render(status_up[i][0],True,(0,0,0))
-            if status_up[i][0]=="HP":
-                screen.blit(txt,(130+180*i,130))
-            else:
-                screen.blit(txt,(95+180*i,130))
-            txt=japanes.render("+"+str(status_up[i][1]),True,(0,0,0))
-            screen.blit(txt,(130+180*i,170))
-        mouse_pos=pygame.mouse.get_pos()
-        mx,my=mouse_pos[0],mouse_pos[1]
-        if my>120 and my<270:
-            if mx>80 and mx<230:
-                pygame.draw.rect(screen,(255,255,0),(80,120,150,150),4)
-            elif mx>260 and mx<410:
-                pygame.draw.rect(screen,(255,255,0),(260,120,150,150),4)
-            elif mx>440 and mx<590:
-                pygame.draw.rect(screen,(255,255,0),(440,120,150,150),4)
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                if my>120 and my<270:
-                    if mx>80 and mx<230:
-                        x=0
-                        levelupflag=False
-                    elif mx>260 and mx<410:
-                        x=1
-                        levelupflag=False
-                    elif mx>440 and mx<590:
-                        x=2
-                        levelupflag=False
-
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-    me.status_up(status_up[x])
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            mouse_pos=pygame.mouse.get_pos()
+            mx=mouse_pos[0]
+            my=mouse_pos[1]
+            if mx>60 and mx<200:
+                if my>SCREEN_H-120 and my<SCREEN_H-70:
+                    attack=0
+                    next_status=5
+                elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=3:
+                    attack=2
+                    next_status=5
+            elif mx>230 and mx<370:
+                if my>SCREEN_H-120 and my<SCREEN_H-70 and len(me.weapon)>=2:
+                    attack=1
+                    next_status=5
+                elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=4:
+                    attack=3
+                    next_status=5
                 
-def choice(me):
-    flag=True
-    cureflag=False
-    weaponflag=False
-    while flag:
-        screen.fill((255,255,255))
-        pygame.draw.rect(screen,(0,0,0),(150,120,150,150),4)
-        pygame.draw.rect(screen,(0,0,0),(340,120,150,150),4)
-        cure=japanes.render("回復",True,(0,0,0))
-        w_add=japanes.render("技追加",True,(0,0,0))
-        w_change=japanes.render("変更",True,(0,0,0))
-        screen.blit(cure,(195,170))
-        screen.blit(w_add,(380,140))
-        screen.blit(w_change,(390,175))
-        mx,my=pygame.mouse.get_pos()
-        if mx>140 and mx<310 and my>110 and my<280:
-            pygame.draw.rect(screen,(255,255,0),(150,120,150,150),4)
-        elif mx>330 and mx<500 and my>110 and my<280:
-            pygame.draw.rect(screen,(255,255,0),(340,120,150,150),4)
-        pygame.display.update()
+            if event.type == pygame.QUIT:
+                next_status=-1
+    return next_status,attack
 
-        for event in pygame.event.get():
-            if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                if mx>140 and mx<310 and my>110 and my<280:
-                    cureflag=True
-                    flag=False
-                elif mx>330 and mx<500 and my>110 and my<280:
-                    weaponflag=True
-                    flag=False
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
+#バトル処理   
+def battle_process(target,now_act,damage,batsugun,buff,debuff,me,enemy,message_w,weapon):
+    finish=False
+    if buff:
+        pass
+    elif debuff:
+        pass
+    elif damage>0:
+        target.HP.hp_update(1)
+        damage-=1
+        if damage<=0:
+            finish=True
     screen.fill((255,255,255))
-    if cureflag:
-        me.cure(100)
-    elif weaponflag:
-        weponchange(me)
+    me.draw()
+    enemy.draw()
+    enemy.name_draw()
+    message_w.draw()
+    if buff:
+        message_w.buff(now_act,weapon)
+    elif debuff:
+        message_w.debuff(now_act,target,weapon)
+    else:
+        message_w.attack(now_act)
+        if batsugun:
+            message_w.batsugun()
     pygame.display.update()
-    click()
+    if buff or debuff:
+        finish=True
+    return damage,finish
 
+# レベルアップ画面
+def level_up(me,status_up):
+    next_status=7
+    x=-1
+    msg=Message_Window()
+    screen.fill((255,255,255))
+    msg.draw()
+    msg.show_status(me)
+    for i in range(3):
+        pygame.draw.rect(screen,(0,0,0),(80+180*i,120,150,150),4)
+        txt=japanes.render(status_up[i][0],True,(0,0,0))
+        if status_up[i][0]=="HP":
+            screen.blit(txt,(130+180*i,130))
+        else:
+            screen.blit(txt,(95+180*i,130))
+        txt=japanes.render("+"+str(status_up[i][1]),True,(0,0,0))
+        screen.blit(txt,(130+180*i,170))
+    mouse_pos=pygame.mouse.get_pos()
+    mx,my=mouse_pos[0],mouse_pos[1]
+    if my>120 and my<270:
+        if mx>80 and mx<230:
+            pygame.draw.rect(screen,(255,255,0),(80,120,150,150),4)
+        elif mx>260 and mx<410:
+            pygame.draw.rect(screen,(255,255,0),(260,120,150,150),4)
+        elif mx>440 and mx<590:
+            pygame.draw.rect(screen,(255,255,0),(440,120,150,150),4)
+    pygame.display.update()
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            if my>120 and my<270:
+                if mx>80 and mx<230:
+                    x=0
+                    next_status=3
+                elif mx>260 and mx<410:
+                    x=1
+                    next_status=3
+                elif mx>440 and mx<590:
+                    x=2
+                    next_status=3
+
+        if event.type==pygame.QUIT:
+            next_status=-1
+    return next_status,x
+
+#回復か技の追加変更かを選ぶ画面  
+def choice(me):
+    next_status=8
+    screen.fill((255,255,255))
+    pygame.draw.rect(screen,(0,0,0),(150,120,150,150),4)
+    pygame.draw.rect(screen,(0,0,0),(340,120,150,150),4)
+    cure=japanes.render("回復",True,(0,0,0))
+    w_add=japanes.render("技追加",True,(0,0,0))
+    w_change=japanes.render("変更",True,(0,0,0))
+    screen.blit(cure,(195,170))
+    screen.blit(w_add,(380,140))
+    screen.blit(w_change,(390,175))
+    mx,my=pygame.mouse.get_pos()
+    if mx>140 and mx<310 and my>110 and my<280:
+        pygame.draw.rect(screen,(255,255,0),(150,120,150,150),4)
+    elif mx>330 and mx<500 and my>110 and my<280:
+        pygame.draw.rect(screen,(255,255,0),(340,120,150,150),4)
+    pygame.display.update()
+
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            if mx>140 and mx<310 and my>110 and my<280:
+                next_status=9
+            elif mx>330 and mx<500 and my>110 and my<280:
+                next_status=10
+        if event.type==pygame.QUIT:
+            next_status=-1
+    return next_status
+
+#クリックしないと進まない処理
 def click():
     endflag=True
+    pygame.draw.polygon(screen,(0,0,0),[[SCREEN_W-25,SCREEN_H-25],[SCREEN_W-10,SCREEN_H-25],[SCREEN_W-17,SCREEN_H-13]])
+    pygame.display.update()
     while endflag:
         for event in pygame.event.get():
             if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
@@ -854,173 +775,178 @@ def click():
                 pygame.quit()
                 sys.exit()
 
-def weponchange(me):
+#技変更するときに現在の技の中から何を忘れるか
+def weaponchange_choice(me,msg):
+    next_status=10
+    finish=False
     change=-1
-    msg=Message_Window()
-    if len(me.weapon)==4:
-        flag=True
-        while flag:
-            screen.fill((255,255,255))
-            txt=japanes.render("どの技を変更する？",True,(0,0,0))
-            screen.blit(txt,(185,120))
-            msg.draw()
-            msg.weapon_draw(me.weapon)
-            pygame.display.update()
-
-            for event in pygame.event.get():
-                if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                    mouse_pos=pygame.mouse.get_pos()
-                    mx=mouse_pos[0]
-                    my=mouse_pos[1]
-                    if mx>60 and mx<200:
-                        if my>SCREEN_H-120 and my<SCREEN_H-70:
-                            change=0
-                            flag=False
-                        elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=3:
-                            change=2
-                            flag=False
-                    elif mx>230 and mx<370:
-                        if my>SCREEN_H-120 and my<SCREEN_H-70 and len(me.weapon)>=2:
-                            change=1
-                            flag=False
-                        elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=4:
-                            change=3
-                            flag=False
-                        
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-    chara=color_read()
-    flag2=True
-    while flag2:
-        screen.fill((255,255,255))
-        txt=japanes.render("どの技にする？",True,(0,0,0))
-        screen.blit(txt,(185,120))
-        msg.draw()
-        msg.weapon_draw(chara.weapon)
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                mouse_pos=pygame.mouse.get_pos()
-                mx=mouse_pos[0]
-                my=mouse_pos[1]
-                if mx>60 and mx<200:
-                    if my>SCREEN_H-120 and my<SCREEN_H-70:
-                        choice=0
-                        flag2=False
-                    elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=3:
-                        choice=2
-                        flag2=False
-                elif mx>230 and mx<370:
-                    if my>SCREEN_H-120 and my<SCREEN_H-70 and len(me.weapon)>=2:
-                        choice=1
-                        flag2=False
-                    elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=4:
-                        choice=3
-                        flag2=False
-                    
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
     screen.fill((255,255,255))
+    txt=japanes.render("どの技を忘れる？",True,(0,0,0))
+    screen.blit(txt,(185,120))
     msg.draw()
-    if change==-1:
-        me.weapon.append(chara.weapon[choice])
-        msg.w_add()
-    else:
-        me.weapon[change]=chara.weapon[choice]
-        msg.w_change(change)
+    msg.weapon_draw(me.weapon)
+    pygame.display.update()
 
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            mouse_pos=pygame.mouse.get_pos()
+            mx=mouse_pos[0]
+            my=mouse_pos[1]
+            if mx>60 and mx<200:
+                if my>SCREEN_H-120 and my<SCREEN_H-70:
+                    change=0
+                    finish=True
+                elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=3:
+                    change=2
+                    finish=True
+            elif mx>230 and mx<370:
+                if my>SCREEN_H-120 and my<SCREEN_H-70 and len(me.weapon)>=2:
+                    change=1
+                    finish=True
+                elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(me.weapon)>=4:
+                    change=3
+                    finish=True
+        if event.type == pygame.QUIT:
+            next_status=-1
+    return next_status,finish,change
 
+#技変更する時に選んだ画像のどの技を覚えるか
+def weaponchange(msg,chara):
+    next_status=10
+    choice=-1
+    screen.fill((255,255,255))
+    txt=japanes.render("どの技を覚える？",True,(0,0,0))
+    screen.blit(txt,(185,120))
+    msg.draw()
+    msg.weapon_draw(chara.weapon)
+    pygame.display.update()
 
-def menu():
-    flag=True
-    title=pygame.image.load("system/title.png")
-    title=pygame.transform.scale(title,(700,262))
-    while flag:
-        screen.fill((255,255,255))
-        start=japanes.render("はじめる",True,(0,0,0))
-        quit=japanes.render("おわる",True,(0,0,0))
-        mx,my=pygame.mouse.get_pos()
-        if mx>SCREEN_W/3+35 and mx<SCREEN_W/3+175:
-            if my>SCREEN_H/4*2-10 and my<SCREEN_H/4*2+40:
-                start=japanes.render("はじめる",True,(200,100,0))
-            elif my>SCREEN_H/4*2+50 and my<SCREEN_H/4*2+100:
-                quit=japanes.render("おわる",True,(200,100,0))
-        screen.blit(start,(SCREEN_W/3+45,SCREEN_H/4*2))
-        screen.blit(quit,(SCREEN_W/3+60,SCREEN_H/4*2+60))
-        screen.blit(title,(-20,40))
-        pygame.display.update()
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            mouse_pos=pygame.mouse.get_pos()
+            mx=mouse_pos[0]
+            my=mouse_pos[1]
+            if mx>60 and mx<200:
+                if my>SCREEN_H-120 and my<SCREEN_H-70:
+                    choice=0
+                    next_status=3
+                elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(chara.weapon)>=3:
+                    choice=2
+                    next_status=3
+            elif mx>230 and mx<370:
+                if my>SCREEN_H-120 and my<SCREEN_H-70 and len(chara.weapon)>=2:
+                    choice=1
+                    next_status=3
+                elif my>SCREEN_H-70 and my<SCREEN_H-20 and len(chara.weapon)>=4:
+                    choice=3
+                    next_status=3
+                
+        if event.type == pygame.QUIT:
+            next_status=-1
+    return next_status,choice
 
-        for event in pygame.event.get():
-            if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                if mx>SCREEN_W/3+35 and mx<SCREEN_W/3+175:
-                    if my>SCREEN_H/4*2-10 and my<SCREEN_H/4*2+40:
-                        flag=False
-                    elif my>SCREEN_H/4*2+50 and my<SCREEN_H/4*2+100:
-                        pygame.quit()
-                        sys.exit()
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+#メニュー(タイトル)画面
+def menu(title):
+    next_status=0
+    screen.fill((255,255,255))
+    start=japanes.render("はじめる",True,(0,0,0))
+    quit=japanes.render("おわる",True,(0,0,0))
+    mx,my=pygame.mouse.get_pos()
+    if mx>SCREEN_W/3+35 and mx<SCREEN_W/3+175:
+        if my>SCREEN_H/4*2-10 and my<SCREEN_H/4*2+40:
+            start=japanes.render("はじめる",True,(200,100,0))
+        elif my>SCREEN_H/4*2+50 and my<SCREEN_H/4*2+100:
+            quit=japanes.render("おわる",True,(200,100,0))
+    screen.blit(start,(SCREEN_W/3+45,SCREEN_H/4*2))
+    screen.blit(quit,(SCREEN_W/3+60,SCREEN_H/4*2+60))
+    screen.blit(title,(-20,40))
+    pygame.display.update()
 
-    while not flag:
-        screen.fill((255,255,255))
-        level=["デモ用(5戦)","イージー(10戦)","ノーマル(20戦)","ハード(50戦)","エンドレス"]
-        txt=japanes.render("難易度を選択",True,(0,0,0))
-        screen.blit(txt,(SCREEN_W/3+20,20))
-        h=70
-        for l in level:
-            txt=japanes.render(l,True,(0,0,0))
-            screen.blit(txt,(SCREEN_W/4+30,h))
-            h+=35
-        mouse_pos=pygame.mouse.get_pos()
-        choice=mouse_pos[1]//35-2
-        if choice>=0 and choice<len(level):
-            pygame.draw.rect(screen,(255,0,0),(SCREEN_W/4+28,70+35*choice,250,32),2)
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
-                if choice>=0 and choice<len(l):
-                    flag=True
-            if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-    return choice
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            if mx>SCREEN_W/3+35 and mx<SCREEN_W/3+175:
+                if my>SCREEN_H/4*2-10 and my<SCREEN_H/4*2+40:
+                    next_status=1
+                elif my>SCREEN_H/4*2+50 and my<SCREEN_H/4*2+100:
+                    next_status=-1
+        if event.type==pygame.QUIT:
+            next_status=-1
+    return next_status
 
+#難易度選択画面
+def difficulty():
+    next_status=1
+    screen.fill((255,255,255))
+    level=["デモ用(5戦)","イージー(10戦)","ノーマル(20戦)","ハード(50戦)","エンドレス"]
+    txt=japanes.render("難易度を選択",True,(0,0,0))
+    screen.blit(txt,(SCREEN_W/3+20,20))
+    h=70
+    for l in level:
+        txt=japanes.render(l,True,(0,0,0))
+        screen.blit(txt,(SCREEN_W/4+30,h))
+        h+=35
+    mouse_pos=pygame.mouse.get_pos()
+    choice=mouse_pos[1]//35-2
+    if choice>=0 and choice<len(level):
+        pygame.draw.rect(screen,(255,0,0),(SCREEN_W/4+28,70+35*choice,250,32),2)
+    pygame.display.update()
+    for event in pygame.event.get():
+        if event.type==pygame.MOUSEBUTTONDOWN and event.button==1:
+            if choice>=0 and choice<len(l):
+                next_status=2
+        if event.type == pygame.QUIT:
+                next_status=-1
+    return next_status,choice
+
+#画像が存在しなかった場合
+def no_image():
+    screen.fill((255,255,255))
+    txt=japanes.render("フォルダに画像を入れてください",True,(0,0,0))
+    screen.blit(txt,(SCREEN_W/3+20,SCREEN_H/2))
+    pygame.display.update()
     
 # メイン
 def main():
+    status=0 #現在の処理
+    bossflag=False
+    title=pygame.image.load("system/title.png")
+    title=pygame.transform.scale(title,(700,262))
+    message_w=Message_Window()
+    files=glob.glob("./image/*")
+    files.sort()
     while True:
-        level=menu()
-        if level==0:
-            limit=5
-        elif level==1:
-            limit=10
-        elif level==2:
-            limit=20
-        elif level==3:
-            limit=50
-        else:
-            limit=9999
-        message_w=Message_Window()
-        me=color_read() # この後画面遷移
-        for i in range(limit):
-            if (i+1)%10 in [4,9]:
-                choice(me)
-            elif (i+1)%10==0 or (i+1)==limit:
-                boss=BOSS(i)
-                battle_phase(me,boss,message_w)
-                me.buff=[0,0,0]
-                me.debuff=[0,0,0]
-                if me.check_death():
-                    break
-                if not (i+1)==limit:
-                    level_up(me)
+        clock.tick(60)
+        if status==0:#メニュー画面
+            status=menu(title)
+        elif status==1:#難易度選択画面
+            status,level=difficulty()
+            if level==0:
+                limit=5
+            elif level==1:
+                limit=10
+            elif level==2:
+                limit=20
+            elif level==3:
+                limit=50
             else:
+                limit=9999
+        elif status==2:#自機の画像選択画面
+            now_level=1
+            if len(files)==0:
+                no_image()
+                click()
+                status=-1
+            status,fin,img=get_image_file(files)
+            if fin:
+                me=color_read(img)
+        elif status==3:#次のステージ移行処理
+            if now_level%10 in [4,9]:#1の位が4か9のときに回復・技追加変更
+                status=8
+            elif now_level%10==0 or now_level==limit:#最終面か十の倍数面のときボス戦
+                enemy=BOSS(now_level)
+                status=4
+                bossflag=True
+            else:#それ以外は通常戦（敵はランダム生成）
                 rnd=np.random.rand(8)
                 col=[]
                 for j,x in enumerate(rnd):
@@ -1037,23 +963,154 @@ def main():
                     max_color_num=np.random.choice(ind)
                 else:
                     max_color_num=col.index(max(col))
-                enemy=Enemy(what_is_color[max_color_num],col,i)
-                battle_phase(me,enemy,message_w)
-                me.buff=[0,0,0]
-                me.debuff=[0,0,0]
-                if me.check_death():
-                    break
-                level_up(me)
-
-        screen.fill((255,255,255))
-        message_w.draw()
-        if me.check_death():
-            message_w.gameover()
-            message_w.toutatu(i)
-        else:
-            message_w.clear()
-        pygame.display.update()
-        click()
+                enemy=Enemy(what_is_color[max_color_num],col,now_level)
+                status=4
+        elif status==4:#バトル内わざ選択画面
+            speed_check=True
+            level_up_flag=True
+            if type(enemy)==BOSS and bossflag:#ボス戦の場合最初だけ文字列表示
+                screen.fill((255,255,255))
+                me.draw()
+                enemy.draw()
+                enemy.name_draw()
+                message_w.draw()
+                pygame.draw.rect(screen,(255,255,0),(0,SCREEN_H/4,SCREEN_W,120),0)
+                txt=bigjapanese.render("B O S S",True,(255,0,0))
+                screen.blit(txt,(SCREEN_W/2-150,SCREEN_H/4+35))
+                pygame.display.update()
+                pygame.time.delay(1500)
+                bossflag=False
+            status,atk=battle_phase_choice(me,enemy,message_w)
+        elif status==5:#バトル処理
+            if speed_check:
+                dmg_calc_me=True
+                dmg_calc_en=True
+                speed_check=False
+                rnd=0
+                my_speed=me.speed*(1+me.buff[2]/2)*(2/(2+me.debuff[2]))
+                en_speed=enemy.speed*(1+enemy.buff[2]/2)*(2/(2+enemy.debuff[2]))
+                if my_speed==en_speed:#スピードが同じならランダムで決定
+                    rnd=np.random.randint(0,2)
+                    if rnd==0:
+                        rnd=-1
+                my_speed+=rnd
+                if my_speed>en_speed:
+                    now_turn=1
+                else:
+                    now_turn=10
+            if now_turn%10==1:#自分のターン
+                if dmg_calc_en:#ダメージ計算
+                    damage,batsugun_flag,buff_flag,debuff_flag=enemy.receive_damage(me.weapon[atk],me)
+                    dmg_calc_en=False
+                damage,fin_flag=battle_process(enemy,me,damage,batsugun_flag,buff_flag,debuff_flag,me,enemy,message_w,me.weapon[atk])
+                if fin_flag:
+                    click()
+                    now_turn+=11
+            elif now_turn//10==1:#相手のターン
+                if dmg_calc_me:
+                    e_choice=np.random.randint(0,len(enemy.weapon))
+                    damage,batsugun_flag,buff_flag,debuff_flag=me.receive_damage(enemy.weapon[e_choice],enemy)
+                    dmg_calc_me=False
+                damage,fin_flag=battle_process(me,enemy,damage,batsugun_flag,buff_flag,debuff_flag,me,enemy,message_w,enemy.weapon[e_choice])
+                if fin_flag:
+                    click()
+                    now_turn+=11
+            if me.check_death() or enemy.check_death():#倒れたか
+                click()
+                status=6
+            if now_turn==32 or now_turn==23:#両方のターン終了
+                status=4
+        elif status==6:#どちらかが倒れた（バトルが終了した）とき
+            me.buff=[0,0,0]
+            me.debuff=[0,0,0]
+            screen.fill((255,255,255))
+            me.draw()
+            enemy.draw()
+            enemy.name_draw()
+            message_w.draw()
+            if me.check_death():
+                message_w.lose(me)
+                status=11
+            else:
+                message_w.lose(enemy)
+                if not now_level==limit:
+                    status=7
+                    now_level+=1
+                else:
+                    status=11
+            pygame.display.update()
+            click()
+        elif status==7:#レベルアップ画面
+            if level_up_flag:
+                level_up_flag=False
+                types=["HP","こうげき","ぼうぎょ","すばやさ"]
+                hp_update_num=[10,30,50]
+                update_num=[1,3,5]
+                status_up=[]
+                count=0
+                while count<3:#強化要素はランダムで決定，被らないようにする
+                    s=np.random.choice(types)
+                    i=np.random.choice([0,1,2],p=[0.2,0.7,0.1])
+                    if s=="HP":
+                        x=[s,hp_update_num[i]]
+                    else:
+                        x=[s,update_num[i]]
+                    if not x in status_up:
+                        status_up.append(x)
+                        count+=1
+            status,x=level_up(me,status_up)
+            if not status==7:
+                me.status_up(status_up[x])
+        elif status==8:#回復か技追加変更か選択画面
+            status=choice(me)
+            change=-1
+            choiceflag=False
+            imageflag=False
+            chara=None
+            if not status==8:
+                now_level+=1
+        elif status==9:#回復画面
+            me.cure(100)
+            screen.fill((255,255,255))
+            message_w.draw()
+            message_w.cure(me.name)
+            pygame.display.update()
+            status=3
+            click()
+        elif status==10:#技追加変更画面
+            if len(me.weapon)==4 and not choiceflag:#わざを既に4つ覚えてる場合
+                status,choiceflag,change=weaponchange_choice(me,message_w)
+            elif not imageflag:#画像選択
+                _,imageflag,image=get_image_file(files)
+            else:#選択した画像からわざ決定
+                if chara==None:
+                    chara=color_read(image)
+                status,w_choice=weaponchange(message_w,chara)
+                if not status==10:
+                    screen.fill((255,255,255))
+                    message_w.draw()
+                    if change==-1:
+                        me.weapon.append(chara.weapon[w_choice])
+                        message_w.w_add()
+                    else:
+                        me.weapon[change]=chara.weapon[w_choice]
+                        message_w.w_change(change)
+                    pygame.display.update()
+                    click()
+        elif status==11:#ゲーム終了
+            screen.fill((255,255,255))
+            message_w.draw()
+            if me.check_death():#ゲームオーバー
+                message_w.gameover()
+                message_w.toutatu(now_level)
+            else:#クリア
+                message_w.clear()
+            pygame.display.update()
+            status=0
+            click()
+        else:#終了
+            pygame.quit()
+            sys.exit()
 
 
 
